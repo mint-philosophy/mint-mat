@@ -6,7 +6,7 @@ protocol Named {
 }
 
 enum MatColour: String, CaseIterable, Identifiable, Named {
-    case black, charcoal, offWhite
+    case black, charcoal, offWhite, fromPhoto
 
     var id: String { rawValue }
 
@@ -15,14 +15,17 @@ enum MatColour: String, CaseIterable, Identifiable, Named {
         case .black: "Black"
         case .charcoal: "Charcoal"
         case .offWhite: "Off-white"
+        case .fromPhoto: "From photo"
         }
     }
 
-    var color: Color {
+    /// The mat colour, given the tone of the photo it surrounds.
+    func color(for tone: PhotoTone?) -> Color {
         switch self {
         case .black: .black
         case .charcoal: Color(red: 0.12, green: 0.12, blue: 0.12)
         case .offWhite: Color(red: 0.95, green: 0.94, blue: 0.91)
+        case .fromPhoto: tone?.mat ?? .black
         }
     }
 
@@ -47,7 +50,7 @@ enum Bevel: String, CaseIterable, Identifiable, Named {
     }
 
     /// Colour of the bevel's brightest (upward-facing) side, or nil for no bevel.
-    func core(for mat: MatColour) -> Color? {
+    func core(for mat: MatColour, tone: PhotoTone?) -> Color? {
         switch self {
         case .off: nil
         case .whiteCore: Color(red: 0.96, green: 0.95, blue: 0.91)
@@ -56,6 +59,7 @@ enum Bevel: String, CaseIterable, Identifiable, Named {
             case .black: Color(white: 0.2)
             case .charcoal: Color(white: 0.3)
             case .offWhite: Color(red: 0.99, green: 0.98, blue: 0.96)
+            case .fromPhoto: tone?.bevel ?? Color(white: 0.2)
             }
         }
     }

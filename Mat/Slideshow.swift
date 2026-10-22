@@ -18,6 +18,7 @@ struct Slide: Identifiable {
     let id = UUID()
     let photoID: String
     let image: UIImage
+    let tone: PhotoTone
 }
 
 /// Shuffles through the chosen album, one deck per orientation, so every matching photo
@@ -106,7 +107,7 @@ final class Slideshow {
                 history.append(id)
                 if history.count > 200 { history.removeFirst(history.count - 200) }
             }
-            let slide = Slide(photoID: id, image: image)
+            let slide = Slide(photoID: id, image: image, tone: PhotoTone(image: image))
             withAnimation(.easeInOut(duration: fade)) { slides.append(slide) }
             Task {
                 try? await Task.sleep(for: .seconds(fade + 0.25))

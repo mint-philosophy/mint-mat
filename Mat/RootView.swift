@@ -26,13 +26,17 @@ struct RootView: View {
             let screen = geo.size
             let window = MatGeometry.window(in: screen, settings: settings)
             ZStack {
-                settings.matColour.color
+                settings.matColour.color(for: nil)
+                // Each slide carries its own mat and bevel, so a mat taken from the photo crossfades with it.
                 ForEach(slideshow.slides) { slide in
-                    SlideView(slide: slide, screen: screen, window: window, mat: settings.matColour.color, crop: settings.cropMode)
-                        .transition(.asymmetric(insertion: .opacity, removal: .identity))
-                }
-                if let core = settings.bevel.core(for: settings.matColour) {
-                    BevelView(window: window, width: MatGeometry.bevelWidth(screen: screen), core: core)
+                    SlideView(
+                        slide: slide, screen: screen, window: window,
+                        mat: settings.matColour.color(for: slide.tone),
+                        bevel: settings.bevel.core(for: settings.matColour, tone: slide.tone),
+                        bevelWidth: MatGeometry.bevelWidth(screen: screen),
+                        crop: settings.cropMode
+                    )
+                    .transition(.asymmetric(insertion: .opacity, removal: .identity))
                 }
                 StatusMessage(state: slideshow.state, orientation: Orientation(screen), settings: settings)
                 Color.black
@@ -112,6 +116,8 @@ private struct SlideView: View {
     let screen: CGSize
     let window: CGRect
     let mat: Color
+    let bevel: Color?
+    let bevelWidth: CGFloat
     let crop: CropMode
 
     var body: some View {
@@ -123,6 +129,9 @@ private struct SlideView: View {
                 .frame(width: window.width, height: window.height)
                 .clipped()
                 .position(x: window.midX, y: window.midY)
+            if let bevel {
+                BevelView(window: window, width: bevelWidth, core: bevel)
+            }
         }
         .frame(width: screen.width, height: screen.height)
     }

@@ -6,7 +6,7 @@ protocol Named {
 }
 
 enum MatColour: String, CaseIterable, Identifiable, Named {
-    case black, charcoal, offWhite, fromPhoto
+    case black, charcoal, offWhite
 
     var id: String { rawValue }
 
@@ -15,17 +15,14 @@ enum MatColour: String, CaseIterable, Identifiable, Named {
         case .black: "Black"
         case .charcoal: "Charcoal"
         case .offWhite: "Off-white"
-        case .fromPhoto: "From photo"
         }
     }
 
-    /// The mat colour, given the tone of the photo it surrounds.
-    func color(for tone: PhotoTone?) -> Color {
+    var color: Color {
         switch self {
         case .black: .black
         case .charcoal: Color(red: 0.12, green: 0.12, blue: 0.12)
         case .offWhite: Color(red: 0.95, green: 0.94, blue: 0.91)
-        case .fromPhoto: tone?.mat ?? .black
         }
     }
 
@@ -37,7 +34,7 @@ enum MatColour: String, CaseIterable, Identifiable, Named {
 
 /// The 45° cut around the opening, showing the board's core.
 enum Bevel: String, CaseIterable, Identifiable, Named {
-    case off, whiteCore, matching
+    case off, whiteCore, matching, fromPhoto
 
     var id: String { rawValue }
 
@@ -46,6 +43,7 @@ enum Bevel: String, CaseIterable, Identifiable, Named {
         case .off: "None"
         case .whiteCore: "White core"
         case .matching: "Matching"
+        case .fromPhoto: "From photo"
         }
     }
 
@@ -59,8 +57,8 @@ enum Bevel: String, CaseIterable, Identifiable, Named {
             case .black: Color(white: 0.2)
             case .charcoal: Color(white: 0.3)
             case .offWhite: Color(red: 0.99, green: 0.98, blue: 0.96)
-            case .fromPhoto: tone?.bevel ?? Color(white: 0.2)
             }
+        case .fromPhoto: tone?.core ?? Color(white: 0.45)
         }
     }
 }
@@ -77,6 +75,10 @@ final class Settings {
     static let fades: [Double] = [1, 2, 3, 5]
     static let marginStops: [Double] = [0.5, 0.75, 1, 1.25, 1.5, 2]
     static let marginRange: ClosedRange<Double> = 0.25...2.5
+    static let keys: Set<String> = [
+        "albumID", "albumTitle", "interval", "fade", "marginInches", "bottomWeighted",
+        "matColour", "bevel", "cropMode", "nightEnabled", "nightStart", "nightEnd",
+    ]
 
     @ObservationIgnored private let defaults = UserDefaults.standard
 
@@ -108,6 +110,14 @@ final class Settings {
             "nightStart": 23 * 60,
             "nightEnd": 7 * 60,
         ])
+        // `-MatApply YES` plus setting arguments (such as `-bevel fromPhoto`) saves those settings,
+        // so they can be changed from a Mac with `devicectl device process launch`.
+        if d.bool(forKey: "MatApply"),
+           let arguments = d.volatileDomain(forName: UserDefaults.argumentDomain) as? [String: Any] {
+            for (key, value) in arguments where Self.keys.contains(key) {
+                d.set(value, forKey: key)
+            }
+        }
         albumID = d.string(forKey: "albumID")
         albumTitle = d.string(forKey: "albumTitle")
         interval = d.double(forKey: "interval")

@@ -1,22 +1,21 @@
 import SwiftUI
 import UIKit
 
-/// A mat colour taken from the photo: a dark, muted version of its most prominent hue, the way a
-/// framer picks a mat that echoes the picture rather than competing with it.
+/// A bevel core colour taken from the photo: a softened version of its most prominent hue, the way
+/// a framer picks a coloured core that echoes the picture rather than competing with it.
 struct PhotoTone {
-    let mat: Color
-    /// Slightly lighter, for a bevel that matches the mat.
-    let bevel: Color
+    let core: Color
 
     init(image: UIImage) {
-        let (hue, saturation) = Self.dominantHue(of: image) ?? (0, 0)
-        let s = min(saturation, 0.5) * 0.7
-        mat = Color(hue: hue, saturation: s, brightness: 0.22)
-        bevel = Color(hue: hue, saturation: s * 0.9, brightness: 0.34)
+        if let dominant = Self.dominantHue(of: image) {
+            core = Color(hue: dominant.hue, saturation: min(dominant.saturation, 0.6) * 0.85, brightness: 0.62)
+        } else {
+            core = Color(white: 0.45)
+        }
     }
 
     /// Hue and saturation of the strongest colour, or nil if the photo is essentially grey.
-    private static func dominantHue(of image: UIImage) -> (Double, Double)? {
+    private static func dominantHue(of image: UIImage) -> (hue: Double, saturation: Double)? {
         guard let cg = image.cgImage else { return nil }
         let side = 32
         var pixels = [UInt8](repeating: 0, count: side * side * 4)

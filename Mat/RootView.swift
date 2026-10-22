@@ -26,12 +26,12 @@ struct RootView: View {
             let screen = geo.size
             let window = MatGeometry.window(in: screen, settings: settings)
             ZStack {
-                settings.matColour.color(for: nil)
-                // Each slide carries its own mat and bevel, so a mat taken from the photo crossfades with it.
+                settings.matColour.color
+                // Each slide carries its own mat and bevel, so a bevel coloured from the photo crossfades with it.
                 ForEach(slideshow.slides) { slide in
                     SlideView(
                         slide: slide, screen: screen, window: window,
-                        mat: settings.matColour.color(for: slide.tone),
+                        mat: settings.matColour.color,
                         bevel: settings.bevel.core(for: settings.matColour, tone: slide.tone),
                         bevelWidth: MatGeometry.bevelWidth(screen: screen),
                         crop: settings.cropMode

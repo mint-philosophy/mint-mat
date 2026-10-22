@@ -1,0 +1,5 @@
+// Copy this file to Local.xcconfig and fill in your own values.
+// Your team ID is under Membership details at developer.apple.com/account.
+DEVELOPMENT_TEAM = ABCDE12345
+// Any reverse domain you control; the app id becomes <prefix>.mat
+MAT_BUNDLE_ID_PREFIX = com.yourname

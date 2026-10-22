@@ -98,7 +98,7 @@ final class Settings {
             "marginInches": 1.0,
             "bottomWeighted": false,
             "matColour": MatColour.black.rawValue,
-            "bevel": Bevel.whiteCore.rawValue,
+            "bevel": Bevel.matching.rawValue,
             "cropMode": CropMode.fill.rawValue,
             "nightEnabled": true,
             "nightStart": 23 * 60,
@@ -111,7 +111,7 @@ final class Settings {
         marginInches = d.double(forKey: "marginInches")
         bottomWeighted = d.bool(forKey: "bottomWeighted")
         matColour = MatColour(rawValue: d.string(forKey: "matColour") ?? "") ?? .black
-        bevel = Bevel(rawValue: d.string(forKey: "bevel") ?? "") ?? .whiteCore
+        bevel = Bevel(rawValue: d.string(forKey: "bevel") ?? "") ?? .matching
         cropMode = CropMode(rawValue: d.string(forKey: "cropMode") ?? "") ?? .fill
         nightEnabled = d.bool(forKey: "nightEnabled")
         nightStart = d.integer(forKey: "nightStart")

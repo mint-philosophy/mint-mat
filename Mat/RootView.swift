@@ -31,6 +31,9 @@ struct RootView: View {
                     SlideView(slide: slide, screen: screen, window: window, mat: settings.matColour.color, crop: settings.cropMode)
                         .transition(.asymmetric(insertion: .opacity, removal: .identity))
                 }
+                if let core = settings.bevel.core(for: settings.matColour) {
+                    BevelView(window: window, width: MatGeometry.bevelWidth(screen: screen), core: core)
+                }
                 StatusMessage(state: slideshow.state, orientation: Orientation(screen), settings: settings)
                 Color.black
                     .opacity(isNight ? 1 : 0)

@@ -1,6 +1,11 @@
 import SwiftUI
 
-enum MatColour: String, CaseIterable, Identifiable {
+/// An option with a display name, for the settings panel's segmented pickers.
+protocol Named {
+    var name: String { get }
+}
+
+enum MatColour: String, CaseIterable, Identifiable, Named {
     case black, charcoal, offWhite
 
     var id: String { rawValue }
@@ -27,6 +32,35 @@ enum MatColour: String, CaseIterable, Identifiable {
     }
 }
 
+/// The 45° cut around the opening, showing the board's core.
+enum Bevel: String, CaseIterable, Identifiable, Named {
+    case off, whiteCore, matching
+
+    var id: String { rawValue }
+
+    var name: String {
+        switch self {
+        case .off: "None"
+        case .whiteCore: "White core"
+        case .matching: "Matching"
+        }
+    }
+
+    /// Colour of the bevel's brightest (upward-facing) side, or nil for no bevel.
+    func core(for mat: MatColour) -> Color? {
+        switch self {
+        case .off: nil
+        case .whiteCore: Color(red: 0.96, green: 0.95, blue: 0.91)
+        case .matching:
+            switch mat {
+            case .black: Color(white: 0.2)
+            case .charcoal: Color(white: 0.3)
+            case .offWhite: Color(red: 0.99, green: 0.98, blue: 0.96)
+            }
+        }
+    }
+}
+
 enum CropMode: String, CaseIterable, Identifiable {
     case fill, fit
     var id: String { rawValue }
@@ -49,6 +83,7 @@ final class Settings {
     var marginInches: Double { didSet { defaults.set(marginInches, forKey: "marginInches") } }
     var bottomWeighted: Bool { didSet { defaults.set(bottomWeighted, forKey: "bottomWeighted") } }
     var matColour: MatColour { didSet { defaults.set(matColour.rawValue, forKey: "matColour") } }
+    var bevel: Bevel { didSet { defaults.set(bevel.rawValue, forKey: "bevel") } }
     var cropMode: CropMode { didSet { defaults.set(cropMode.rawValue, forKey: "cropMode") } }
     var nightEnabled: Bool { didSet { defaults.set(nightEnabled, forKey: "nightEnabled") } }
     /// Minutes after midnight.
@@ -63,6 +98,7 @@ final class Settings {
             "marginInches": 1.0,
             "bottomWeighted": false,
             "matColour": MatColour.black.rawValue,
+            "bevel": Bevel.whiteCore.rawValue,
             "cropMode": CropMode.fill.rawValue,
             "nightEnabled": true,
             "nightStart": 23 * 60,
@@ -75,6 +111,7 @@ final class Settings {
         marginInches = d.double(forKey: "marginInches")
         bottomWeighted = d.bool(forKey: "bottomWeighted")
         matColour = MatColour(rawValue: d.string(forKey: "matColour") ?? "") ?? .black
+        bevel = Bevel(rawValue: d.string(forKey: "bevel") ?? "") ?? .whiteCore
         cropMode = CropMode(rawValue: d.string(forKey: "cropMode") ?? "") ?? .fill
         nightEnabled = d.bool(forKey: "nightEnabled")
         nightStart = d.integer(forKey: "nightStart")
@@ -102,6 +139,11 @@ enum MatGeometry {
     /// iPads draw at 2x. Most have 264 pixels per inch (132 points); the iPad mini has 326 (163 points).
     static func pointsPerInch(screen: CGSize) -> CGFloat {
         min(screen.width, screen.height) == 744 ? 163 : 132
+    }
+
+    /// Visible width of the bevel, as on a standard 4-ply mat.
+    static func bevelWidth(screen: CGSize) -> CGFloat {
+        0.08 * pointsPerInch(screen: screen)
     }
 
     /// The opening in the mat, in screen points.

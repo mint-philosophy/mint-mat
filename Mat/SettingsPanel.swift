@@ -25,10 +25,8 @@ struct SettingsPanel: View {
                 Section("Mat") {
                     marginControl
                     Toggle("Deeper bottom margin", isOn: $settings.bottomWeighted)
-                    Picker("Colour", selection: $settings.matColour) {
-                        ForEach(MatColour.allCases) { Text($0.name).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
+                    segmented("Colour", selection: $settings.matColour)
+                    segmented("Bevelled edge", selection: $settings.bevel)
                     Picker("Photos", selection: $settings.cropMode) {
                         Text("Fill the opening").tag(CropMode.fill)
                         Text("Fit inside it").tag(CropMode.fit)
@@ -92,6 +90,20 @@ struct SettingsPanel: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    private func segmented<Option: CaseIterable & Identifiable & Hashable>(
+        _ title: String, selection: Binding<Option>
+    ) -> some View where Option.AllCases: RandomAccessCollection, Option: Named {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+            Picker(title, selection: selection) {
+                ForEach(Option.allCases) { Text($0.name).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+        }
+        .padding(.vertical, 2)
     }
 
     private func time(_ keyPath: ReferenceWritableKeyPath<Settings, Int>) -> Binding<Date> {
